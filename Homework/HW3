@@ -1,1 +1,34 @@
- 
+import numpy as np
+import pandas as pd
+data = pd.read_csv('student_logins.csv')
+data.head()
+data.session_start_time = pd.to_datetime(data.session_start_time)
+data.session_end_time = data.session_end_time.apply(pd.to_datetime)
+data.student_account_created = pd.to_datetime(data.student_account_created)
+data.head()
+from datetime import timedelta
+duration = []
+data['duration'] = data.session_end_time - data.session_start_time
+timeframe = []
+data['timeframe'] = data.session_end_time - data.student_account_created
+data.head()
+from pandas.tools.plotting import scatter_matrix
+scat = scatter_matrix(data.iloc[:,2:])
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as n
+X = data[['timeframe','problems_completed']].values
+y = data['duration'].values
+from sklearn.cross_validation import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+myknn = KNeighborsClassifier(3).fit(X_train,y_train)
+myknn.score(X_test, y_test)
+from sklearn.cross_validation import cross_val_score, ShuffleSplit
+from sklearn.neighbors import KNeighborsClassifier
+n_samples = len(y)
+knn = KNeighborsClassifier()
+cv = ShuffleSplit(n_samples, n_iter=10, test_size=0.2, random_state=0)
+test_scores = cross_val_score(knn, X, y, cv=cv)
+test_scores.mean()
+#stuck
