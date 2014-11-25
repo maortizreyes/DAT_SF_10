@@ -1,0 +1,128 @@
+import pandas as pd
+import numpy as np
+import pylab as pl
+from sklearn.cross_validation import KFold
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+
+df = pd.read_csv('wine.data' ,header=None)
+df.head()
+
+df.info()
+
+1
+Classify the raw data using a linear SVM. Do you need to perform several binary classifications or does scikit-learn support multi-class classification with SVMs?
+
+from sklearn.svm import SVC
+
+def scoreModels(features, target, folds=10):
+    "Calcs crovs-validation scores for multiple algorithms"
+    models = []
+    models.append(RandomForestClassifier(random_state=0).fit)
+    models.append(LogisticRegression(C=1.0).fit)
+    models.append(KNeighborsClassifier(3).fit)
+    models.append(SVC(C=1.0))
+    models.append(GaussianNB().fit)
+
+    for alg in models:
+        print alg
+        print cross_validate(features, target, alg, folds)
+        
+2
+Cross validate the result
+
+def cross_validate(X, y, classifier, k_fold):
+    "Scores classifier using kfold cross_validation"
+    # derive a set of (random) training and testing indices
+    k_fold_indices = KFold(len(X), n_folds=k_fold,
+                           shuffle=True, random_state=0)
+
+    k_score_total = 0
+    # train and score classifier for each slice
+    for train_slice, test_slice in k_fold_indices :
+        model = classifier(X[train_slice],y[train_slice])
+        k_score = model.score(X[test_slice], y[test_slice])
+        k_score_total += k_score
+
+    # return the average accuracy
+
+ return k_score_total/k_fold
+ 
+ 3
+Preprocess the data with a normalization step, using the tools explained here:
+http://scikit-learn.org/stable/modules/preprocessing.html#standardization-or- mean-removal-and-variance-scaling
+
+from sklearn import preprocessing
+X = np.array()
+X_scaled = preprocessing.scale(X)
+X_scaled
+
+X_scaled.mean(axis=0)
+
+X_scaled.std(axis=0)
+
+scaler = preprocessing.StandardScaler().fit(X)
+scaler
+
+scaler.mean_
+
+scaler.std_ 
+
+scaler.transform(X)  
+
+4
+Repeat the classification performed in step 1 using a linear SVM and crossvalidate the result. Is it better or worse?
+
+def scoreModels(features, target, folds=10):
+    "Calcs crovs-validation scores for multiple algorithms"
+    models = []
+    models.append(RandomForestClassifier(random_state=0).fit)
+    models.append(LogisticRegression(C=1.0).fit)
+    models.append(KNeighborsClassifier(3).fit)
+    models.append(SVC(C=1.0))
+    models.append(GaussianNB().fit)
+
+    for alg in models:
+        print alg
+        print cross_validate(features, target, alg, folds)
+        
+5 Learn about pipelines here: http://scikit-learn.org/stable/modules/pipeline.html implement a pipeline that comprises:
+
+    a preprocessing step
+    a classification step and run the pipeline on the raw data (not normalized)
+
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.decomposition import PCA
+estimators = [('reduce_dim', PCA()), ('svm', SVC())]
+clf = Pipeline(estimators)
+clf
+
+from sklearn.pipeline import make_pipeline
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.preprocessing import Binarizer
+make_pipeline(Binarizer(), MultinomialNB()) 
+
+clf.steps[0]
+
+clf.named_steps['reduce_dim']
+
+clf.set_params(svm__C=10) 
+
+6 Try varying the value of C or the type of kernel. Do you get better results?
+
+clf.set_params(svm__C=30) 
+
+7 Learn about grid search here: http://scikit-learn.org/stable/modules/grid_search.html and feed your pipeline classifier to the grid search. Explore a range of values for C, gamma and the type of kernel. Can you find an optimum value?
+
+# A search consists of:
+#   an estimator (regressor or classifier such as sklearn.svm.SVC());
+#   a parameter space;
+#   a method for searching or sampling candidates;
+#   a cross-validation scheme; and
+#   a score function.
+
+estimator.get_params()
